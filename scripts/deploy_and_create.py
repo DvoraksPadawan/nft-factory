@@ -3,17 +3,31 @@ from pathlib import Path
 import json
 import os
 import requests
+from brownie import NFTFactory
+import scripts.helpful_scripts as helpful_scripts
 
+OPENSEA_URL = "https://testnets.opensea.io/assets/sepolia/{}/{}"
 
 def main():
-    #print_metadata()
-    create_metadata("Gee", 40, "singer")
-    print_metadata("Gee")
-    collectible_name = "Gee"
-    metadata_filepath = f"./metadata/{collectible_name}.json"
-    upload_to_Pinata(metadata_filepath)
+    deploy()
+    create_collectible("GerardWay", 40, "singer")
+    create_collectible("FrankIero", 39, "guitarist")
+    
 
-def create_metadata(collectible_name, age, position, image = "", description = ""):
+def create_collectible(collectible_name, age, position, desription = "", account = None):
+    account = account if account else helpful_scripts.get_account()
+    image_hash = upload_to_Pinata(get_filepath(collectible_name, True))
+    image_uri = get_ipfs_link(image_hash, collectible_name)
+    create_metadata(collectible_name, age, position, image_uri)
+    metadata_uri = upload_to_Pinata(get_filepath(collectible_name))
+    NFTFactory[-1].createCollectible(metadata_uri, {"from" : account})
+    collectible = NFTFactory[-1]
+    print(
+        f"Awesome, you can view your NFT at {OPENSEA_URL.format(collectible.address, collectible.tokenCounter() - 1)}"
+    )
+
+
+def create_metadata(collectible_name, age, position, image, description = ""):
     metadata = metadata_template
     metadata_filepath = f"./metadata/{collectible_name}.json"
     metadata["name"] = collectible_name
@@ -24,6 +38,13 @@ def create_metadata(collectible_name, age, position, image = "", description = "
     with open(metadata_filepath, "w") as file:
         json.dump(metadata, file)
 
+def get_ipfs_link(hash, filename):
+    ipfs_link = f"https://ipfs.io/ipfs/{hash}?filename={filename}"
+    return ipfs_link
+
+def deploy(account = None):
+    account = account if account else helpful_scripts.get_account()
+    nft_factory = NFTFactory.deploy("MCR bandmates", "MCR", {"from" : account})
 
 def print_metadata(collectible_name):
     metadata_filepath = f"./metadata/{collectible_name}.json"
@@ -31,7 +52,14 @@ def print_metadata(collectible_name):
         metadata = fp.read()
         print(metadata)
 
+def get_filepath(name, image = False):
+    if not image:
+        return f"./metadata/{name}.json"
+    else:
+        return f"./image/{name}.jpg"
+
 def upload_to_Pinata(filepath):
+    filename = filepath.split("/")[-1]
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     headers = {
         "pinata_api_key": os.getenv("PINATA_API_KEY"),
@@ -39,7 +67,9 @@ def upload_to_Pinata(filepath):
     }
     with Path(filepath).open("rb") as fp:
         data = fp.read()
-        response = requests.post(url = url,files = {"file" : ("Gee.json", data)}, headers = headers)
-        print(response.text)
+        response = requests.post(url = url,files = {"file" : (filename, data)}, headers = headers)
+        ipfs_hash = response.json()["IpfsHash"]
+        return ipfs_hash
 
+#https://ipfs.io/ipfs/Qmd1vSMNgdHoqpWPYDwDeghdnyMr4CJ6R2QuLfYa9zFeHS?filename=Gee.json
 #https://ipfs.io/ipfs/Qmd1vSMNgdHoqpWPYDwDeghdnyMr4CJ6R2QuLfYa9zFeHS?filename=Gee.json
