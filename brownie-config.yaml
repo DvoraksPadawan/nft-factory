@@ -10,6 +10,10 @@ dotenv: .env
 
 networks:
   default: Sepolia
+  Sepolia:
+    verify: True
+  development:
+    verify: False
 
 wallets:
   key0: ${PRIVATE_KEY_0}

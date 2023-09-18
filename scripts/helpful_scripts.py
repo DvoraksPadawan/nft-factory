@@ -6,3 +6,6 @@ def get_account(i = 0):
         return accounts.add(config["wallets"]["key" + str(i)])
     else:
         return accounts[i]
+    
+def get_publish_source():
+    return config["networks"][network.show_active()]["verify"]
