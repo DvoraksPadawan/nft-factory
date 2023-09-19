@@ -10,8 +10,8 @@ OPENSEA_URL = "https://testnets.opensea.io/assets/sepolia/{}/{}"
 
 def main():
     deploy()
-    create_collectible("GerardWay", "40", "singer")
-    create_collectible("FrankIero", "39", "guitarist")
+    create_collectible("GerardWay2", "40", "singer")
+    create_collectible("FrankIero2", "39", "guitarist")
     
 
 def create_collectible(collectible_name, age, position, desription = "", account = None):
@@ -42,7 +42,7 @@ def get_ipfs_link(hash, filename, image = False):
     if not image:
         return f"https://ipfs.io/ipfs/{hash}?filename={filename}.json"
     else:
-        return f"https://ipfs.io/ipfs/{hash}?filename={filename}.jpg"
+        return f"https://ipfs.io/ipfs/{hash}?filename={filename}.png"
 
 def deploy(account = None):
     account = account if account else helpful_scripts.get_account()
@@ -59,7 +59,7 @@ def get_filepath(name, image = False):
     if not image:
         return f"./metadata/{name}.json"
     else:
-        return f"./image/{name}.jpg"
+        return f"./image/{name}.png"
 
 def upload_to_Pinata(filepath):
     filename = filepath.split("/")[-1]
