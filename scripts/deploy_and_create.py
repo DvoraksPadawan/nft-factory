@@ -10,8 +10,8 @@ OPENSEA_URL = "https://testnets.opensea.io/assets/sepolia/{}/{}"
 
 def main():
     deploy()
-    create_collectible("GerardWay2", "40", "singer")
-    create_collectible("FrankIero2", "39", "guitarist")
+    create_collectible("GerardWay", "46", "singer")
+    create_collectible("FrankIero", "41", "guitarist")
     
 
 def create_collectible(collectible_name, age, position, desription = "", account = None):
